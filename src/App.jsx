@@ -1,42 +1,150 @@
-import { useState } from "react";
-import Header from "./components/Layout/Header";
-import  Sidebar  from "./components/Layout/Sidebar";
-import Dashboard from "./components/Dashboard/Dashboard";
+import {
+  Routes,
+  Route,
+  Navigate,
+  Router,
+} from "react-router-dom";
 
-const App = () => {
-  const [Sidebarcollapsed, setSidebarCollapsed] = useState(false);
-  const [currentPage, setCurrentPage] = useState("dashboard");  
+import AdminLayout
+from "./components/Layout/AdminLayout";
+
+import ProtectedRoute
+from "./routes/ProtectedRoute";
+
+// PAGES
+
+import Dashboard
+from "./pages/Dashboard";
+
+import Projects
+from "./pages/Projects";
+
+import Enquiries
+from "./pages/Enquiries";
+
+import Users
+from "./pages/Users";
+
+import Settings
+from "./pages/Settings";
+
+import Notifications
+from "./pages/Notifications";
+
+import AllUsers
+from "./pages/AllUsers";
+
+import Roles
+from "./pages/Roles";
+
+import UserActivity
+from "./pages/UserActivity";
+
+import Login
+from "./pages/Login";
+import Register from "./pages/Register";
+
+function App() {
+
   return (
-    <div
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50
-    dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-all duration-500"
-    >
-      <div className="flex h-screen overflow-hidden">
-        <Sidebar
-        collapsed={Sidebarcollapsed}
-        onToggle ={()=>setSidebarCollapsed(!Sidebarcollapsed)}
-        currentPage={currentPage}
-        onPagechange = {setCurrentPage}
-         />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header 
-          Sidebarcollapsed ={Sidebarcollapsed}
-          onToggleSidebar = {() => setSidebarCollapsed(!Sidebarcollapsed)}
-          
+
+    <Routes>
+
+      {/* PUBLIC ROUTE */}
+
+      <Route
+        path="/login"
+        element={<Login />}
+      />
+      <Route
+      path="/register"
+      element={<Register/>}/>
+
+      {/* PROTECTED ROUTES */}
+
+      <Route
+        element={
+          <ProtectedRoute>
+
+            <AdminLayout />
+
+          </ProtectedRoute>
+        }
+      >
+
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/projects"
+          element={<Projects />}
+        />
+
+        <Route
+          path="/enquiries"
+          element={<Enquiries />}
+        />
+
+        <Route
+          path="/users"
+          element={<Users />}
+        />
+
+        <Route
+          path="/users/all-users"
+          element={<AllUsers />}
+        />
+
+        <Route
+          path="/users/roles"
+          element={<Roles />}
+        />
+
+        <Route
+          path="/users/activity"
+          element={<UserActivity />}
+        />
+
+        <Route
+          path="/notifications"
+          element={<Notifications />}
+        />
+
+        <Route
+          path="/settings"
+          element={<Settings />}
+        />
+
+      </Route>
+
+      {/* DEFAULT ROUTE */}
+
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to="/dashboard"
+            replace
           />
-          <main className="flex-1 overflow-y-auto bg-transperent">
-            <div className="p-6 space-y-6">
-              {
-                currentPage === "dashboard" && <Dashboard/>
-              }
+        }
+      />
 
-            </div>
-          </main>
+      {/* 404 */}
 
-        </div>
-      </div>
-    </div>
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to="/dashboard"
+            replace
+          />
+        }
+      />
+
+    </Routes>
   );
-};
+}
 
 export default App;

@@ -11,49 +11,67 @@ export const menuItems = [
   {
     id: 1,
     label: "Dashboard",
+    path: "/dashboard",
     icon: LayoutDashboard,
     badge: null,
+    active: true,
   },
-
   {
     id: 2,
     label: "Projects",
+    path: "/projects",
     icon: Briefcase,
     badge: "12",
+    active: true,
   },
-
   {
     id: 3,
     label: "Enquiries",
+    path: "/enquiries",
     icon: FileText,
     badge: "5",
-    count: "5",
+    count: 5,
+    active: true,
   },
-
   {
     id: 4,
     label: "Users",
+    path: "/users",
     icon: Users,
-    count: "3",
-    submenu:[
-        {id: 1, label: "All Users"},
-        {id: 2, label: "Roles & Permissions"},
-        {id: 3, label: "User Activity"},
+    count: 3,
+    active: true,
+    submenu: [
+      {
+        id: 41,
+        label: "All Users",
+        path: "/users/all-users",
+      },
+      {
+        id: 42,
+        label: "Roles & Permissions",
+        path: "/users/roles",
+      },
+      {
+        id: 43,
+        label: "User Activity",
+        path: "/users/activity",
+      },
     ],
   },
-
   {
     id: 5,
     label: "Notifications",
+    path: "/notifications",
     icon: Bell,
-    active: false,
     badge: "New",
+    active: true,
   },
-
   {
     id: 6,
     label: "Settings",
+    path: "/settings",
     icon: Settings,
     badge: null,
+    active: true,
   },
 ];
