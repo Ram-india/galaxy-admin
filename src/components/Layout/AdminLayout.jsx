@@ -4,66 +4,55 @@ import Header from "../Layout/Header";
 import Sidebar from "../Layout/Sidebar";
 import { Outlet } from "react-router-dom";
 
-const AdminLayout = ({ children }) => {
+const AdminLayout = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] =
     useState(false);
 
   return (
 
-    <div className="flex h-screen overflow-hidden">
+    <div className="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <div className="flex min-h-screen overflow-hidden">
 
-      {/* SIDEBAR */}
+        {/* SIDEBAR */}
 
-      <Sidebar
-        collapsed={sidebarCollapsed}
-        onToggle={() =>
-          setSidebarCollapsed(
-            !sidebarCollapsed
-          )
-        }
-      />
-
-      {/* RIGHT SIDE */}
-
-      <div
-        className="
-          flex-1
-          flex
-          flex-col
-          overflow-hidden
-        "
-      >
-
-        {/* HEADER */}
-
-        <Header
-          sidebarCollapsed={
-            sidebarCollapsed
-          }
-          onToggleSidebar={() =>
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={() =>
             setSidebarCollapsed(
               !sidebarCollapsed
             )
           }
         />
 
-        {/* PAGE CONTENT */}
+        {/* RIGHT SIDE */}
 
-        <main
-          className="
-            flex-1
-            overflow-y-auto
-            p-6
-          "
-        >
+        <div className="flex-1 flex flex-col overflow-hidden">
 
-          <Outlet/>
+          {/* HEADER */}
 
-        </main>
+          <Header
+            sidebarCollapsed={
+              sidebarCollapsed
+            }
+            onToggleSidebar={() =>
+              setSidebarCollapsed(
+                !sidebarCollapsed
+              )
+            }
+          />
+
+          {/* PAGE CONTENT */}
+
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="mx-auto w-full max-w-7xl">
+              <Outlet />
+            </div>
+          </main>
+
+        </div>
 
       </div>
-
     </div>
   );
 };

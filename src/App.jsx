@@ -2,7 +2,7 @@ import {
   Routes,
   Route,
   Navigate,
-  Router,
+
 } from "react-router-dom";
 
 import AdminLayout
@@ -43,6 +43,8 @@ from "./pages/UserActivity";
 import Login
 from "./pages/Login";
 import Register from "./pages/Register";
+import AddProject from "./pages/AddProject";
+import ProjectVeiw from "./components/projects/ProjectVeiw";
 
 function App() {
 
@@ -80,6 +82,14 @@ function App() {
         <Route
           path="/projects"
           element={<Projects />}
+        />
+        <Route
+          path="/projects/:id"
+          element={<ProjectVeiw />}
+        />
+        <Route
+          path="/projects/add"
+          element={<AddProject />}
         />
 
         <Route

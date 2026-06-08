@@ -3,29 +3,42 @@ import {
   ChevronDown,
   Filter,
   Menu,
+  Moon,
   Plus,
   Search,
   Settings,
   Sun,
 } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 
 const Header = ({
-  sidebarCollapsed,
   onToggleSidebar,
 }) => {
 
-  const [showDropdown, setShowDropdown] =
-    useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem("theme") === "dark"
+  );
 
   const navigate = useNavigate();
 
   const { logout, user } = useAuth();
+
+  useEffect(() => {
+    const html = document.documentElement;
+    if (darkMode) {
+      html.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      html.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
 
   const handleLogout = () => {
 
@@ -38,14 +51,18 @@ const Header = ({
 
     <header
       className="
-        bg-white/80
-        dark:bg-slate-900/80
+        sticky
+        top-0
+        z-30
+        bg-white/90
+        dark:bg-slate-950/90
         backdrop-blur-xl
         border-b
         border-slate-200/50
-        dark:border-slate-700/50
+        dark:border-slate-800/50
         px-6
         py-4
+        shadow-sm
       "
     >
 
@@ -164,10 +181,10 @@ const Header = ({
               py-2
               rounded-xl
               bg-gradient-to-r
-              from-blue-500
-              to-purple-600
+              from-blue-600
+              to-violet-600
               text-white
-              hover:shadow-lg
+              hover:shadow-xl
               transition-all
             "
           >
@@ -183,6 +200,7 @@ const Header = ({
           {/* THEME */}
 
           <button
+            onClick={() => setDarkMode((prev) => !prev)}
             className="
               p-2.5
               rounded-xl
@@ -193,7 +211,11 @@ const Header = ({
               transition-colors
             "
           >
-            <Sun className="w-5 h-5" />
+            {darkMode ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
           </button>
 
           {/* NOTIFICATIONS */}

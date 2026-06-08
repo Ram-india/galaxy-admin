@@ -45,16 +45,16 @@ const Sidebar = ({
         ${collapsed ? "w-20" : "w-72"}
 
         min-h-screen
-        bg-white/80
-        dark:bg-slate-900/80
-        backdrop-blur-xl
+        bg-white
+        dark:bg-slate-950
         border-r
-        border-slate-200/50
-        dark:border-slate-700/50
+        border-slate-200/80
+        dark:border-slate-800/80
         transition-all
         duration-500
         flex
         flex-col
+        shadow-xl
       `}
     >
 

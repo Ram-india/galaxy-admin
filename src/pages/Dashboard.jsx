@@ -1,8 +1,13 @@
-import React from 'react'
+import { useState } from "react";
+import ProjectStats from "../components/projects/ProjectStats"
+
 
 const Dashboard = () => {
+  const [projects, setProjects] = useState([]);
   return (
-    <div>Dashboard</div>
+    <div>
+        <ProjectStats projects={projects} />
+    </div>
   )
 }
 
