@@ -13,6 +13,7 @@ import ProjectModal from "../components/projects/ProjectModal";
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [editingProject, setEditingProject] = useState(null);
   const [sortConfig, setSortConfig] = useState({
@@ -29,8 +30,9 @@ const Projects = () => {
     startDate: "",
     completionDate: "",
     description: "",
-    image: null,
-    imagePreview: "",
+    images: [],
+    imagePreviews: [],
+    removedImages: [],
   });
 
   const fetchProjects = async () => {
@@ -117,25 +119,43 @@ const Projects = () => {
         ? project.completionDate.slice(0, 10)
         : "",
       description: project.description || "",
-      image: null,
-      imagePreview: project.images?.[0] || "",
+      images: [],
+      imagePreviews: project.images || [],
+      removedImages: [],
     });
     setShowModal(true);
   };
 
   const handleSave = async () => {
+    if (isSaving) return; // prevent duplicate submissions
+    setIsSaving(true);
     try {
       const payload = new FormData();
 
       Object.entries(formData).forEach(([key, value]) => {
-        if (key === "image") {
-          if (value instanceof File) {
-            payload.append("images", value);
+        if (key === "images") {
+          if (Array.isArray(value) && value.length > 0) {
+            value.forEach((file) => {
+              if (file instanceof File) payload.append("images", file);
+            });
           }
-        } else if (key !== "imagePreview") {
+        } else if (key !== "imagePreviews") {
           payload.append(key, value || "");
         }
       });
+
+      // When editing, include existing remote images to preserve them
+      if (editingProject && formData.imagePreviews && formData.imagePreviews.length) {
+        const existing = formData.imagePreviews.filter(
+          (src) => typeof src === "string" && /^https?:\/\//.test(src)
+        );
+        existing.forEach((url) => payload.append("existingImages", url));
+      }
+
+      // Include any images the user removed so backend can delete them
+      if (editingProject && formData.removedImages && formData.removedImages.length) {
+        formData.removedImages.forEach((url) => payload.append("removedImages", url));
+      }
 
       if (editingProject) {
         await updateProject(editingProject._id, payload);
@@ -157,13 +177,15 @@ const Projects = () => {
         startDate: "",
         completionDate: "",
         description: "",
-        image: null,
-        imagePreview: "",
+        images: [],
+        imagePreviews: [],
       });
       fetchProjects();
     } catch (error) {
       console.log("Error saving project", error);
       alert("Error saving project");
+    } finally {
+      setIsSaving(false);
     }
   };
 

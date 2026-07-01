@@ -5,6 +5,7 @@ const ProjectModal = ({
   formData,
   setFormData,
   editingProject,
+  isSaving,
 }) => {
   if (!show) return null;
 
@@ -172,31 +173,68 @@ const ProjectModal = ({
 
           <div className="md:col-span-2">
             <label className="block mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Project Image
+              Project Images
             </label>
             <input
               type="file"
               accept="image/*"
+              multiple
               onChange={(e) => {
-                const image = e.target.files?.[0] || null;
+                const files = Array.from(e.target.files || []);
+                const previews = files.map((f) => URL.createObjectURL(f));
                 setFormData({
                   ...formData,
-                  image,
-                  imagePreview: image
-                    ? URL.createObjectURL(image)
-                    : formData.imagePreview,
+                  images: files,
+                  imagePreviews: previews.length ? previews : formData.imagePreviews,
                 });
               }}
               className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
 
-            {formData.imagePreview && (
-              <div className="mt-4 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md">
-                <img
-                  src={formData.imagePreview}
-                  alt="Preview"
-                  className="w-full h-56 object-cover"
-                />
+            {formData.imagePreviews && formData.imagePreviews.length > 0 && (
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {formData.imagePreviews.map((src, idx) => (
+                  <div key={idx} className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md">
+                    <img src={src} alt={`Preview ${idx}`} className="w-full h-40 object-cover" />
+                    {/* Show remove button for remote images (URLs) */}
+                    {typeof src === 'string' && /^https?:\/\//.test(src) && (
+                      <button
+                        onClick={() => {
+                          // mark removed and remove from previews
+                          const remaining = formData.imagePreviews.filter((s, i) => i !== idx);
+                          const removed = [...(formData.removedImages || []), src];
+                          setFormData({
+                            ...formData,
+                            imagePreviews: remaining,
+                            removedImages: removed,
+                          });
+                        }}
+                        className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center hover:opacity-90"
+                        title="Remove image"
+                      >
+                        ×
+                      </button>
+                    )}
+                    {/* For local previews (File objects) allow removing before upload */}
+                    {typeof src !== 'string' && (
+                      <button
+                        onClick={() => {
+                          const remaining = formData.imagePreviews.filter((s, i) => i !== idx);
+                          const remainingFiles = (formData.images || []).filter((_, i) => i !== idx);
+                          setFormData({
+                            ...formData,
+                            imagePreviews: remaining,
+                            images: remainingFiles,
+                          });
+                        }}
+                        className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center hover:opacity-90"
+                        title="Remove image"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -211,9 +249,10 @@ const ProjectModal = ({
           </button>
           <button
             onClick={onSave}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-2xl hover:from-blue-700 hover:to-violet-700 transition-all font-medium shadow-lg hover:shadow-xl"
+            disabled={isSaving}
+            className={`px-6 py-3 rounded-2xl text-white transition-all font-medium shadow-lg hover:shadow-xl ${isSaving ? 'opacity-60 cursor-not-allowed bg-slate-400' : 'bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700'}`}
           >
-            {editingProject ? " Update" : " Create"}
+            {isSaving ? 'Saving...' : editingProject ? 'Update' : 'Create'}
           </button>
         </div>
       </div>

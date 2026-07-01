@@ -98,7 +98,7 @@ const Header = ({
                 dark:text-slate-400
               "
             >
-              Welcome back {user.name}
+              Welcome back {user?.name}
             </p>
 
           </div>

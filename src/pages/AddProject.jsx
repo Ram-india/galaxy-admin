@@ -17,8 +17,8 @@ const AddProject = () => {
     startDate: "",
     completionDate: "",
     description: "",
-    image: null,
-    imagePreview: "",
+    images: [],
+    imagePreviews: [],
   });
 
   const handleChange = (e) => {
@@ -29,11 +29,12 @@ const AddProject = () => {
   };
 
   const handleFileChange = (e) => {
-    const image = e.target.files?.[0] || null;
+    const files = Array.from(e.target.files || []);
+    const previews = files.map((f) => URL.createObjectURL(f));
     setFormData({
       ...formData,
-      image,
-      imagePreview: image ? URL.createObjectURL(image) : "",
+      images: files,
+      imagePreviews: previews,
     });
   };
 
@@ -42,11 +43,13 @@ const AddProject = () => {
 
     const payload = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      if (key === "image") {
-        if (value instanceof File) {
-          payload.append("images", value);
+      if (key === "images") {
+        if (Array.isArray(value) && value.length > 0) {
+          value.forEach((file) => {
+            if (file instanceof File) payload.append("images", file);
+          });
         }
-      } else if (key !== "imagePreview") {
+      } else if (key !== "imagePreviews") {
         payload.append(key, value || "");
       }
     });
@@ -158,13 +161,13 @@ const AddProject = () => {
             className="w-full border p-3 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           />
 
-          {formData.imagePreview && (
-            <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-              <img
-                src={formData.imagePreview}
-                alt="Project Preview"
-                className="w-full h-52 object-cover"
-              />
+          {formData.imagePreviews && formData.imagePreviews.length > 0 && (
+            <div className="grid grid-cols-2 gap-3">
+              {formData.imagePreviews.map((src, idx) => (
+                <div key={idx} className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                  <img src={src} alt={`Project Preview ${idx}`} className="w-full h-40 object-cover" />
+                </div>
+              ))}
             </div>
           )}
         </div>
