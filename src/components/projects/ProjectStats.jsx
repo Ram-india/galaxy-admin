@@ -46,7 +46,7 @@ const ProjectStats = ({projects = []}) => {
         {stats.map((item, index) => (
             <div
             key={index} 
-            className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-200/80 dark:border-slate-800/80 overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-200/80 dark:border-slate-800 overflow-hidden"
             >
             <div className={`h-2 bg-gradient-to-r ${item.color}`}/>
             <div className="p-6">

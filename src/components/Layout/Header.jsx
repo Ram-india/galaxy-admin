@@ -10,35 +10,25 @@ import {
   Sun,
 } from "lucide-react";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 
 const Header = ({
   onToggleSidebar,
 }) => {
 
   const [showDropdown, setShowDropdown] = useState(false);
-  const [darkMode, setDarkMode] = useState(
-    () => localStorage.getItem("theme") === "dark"
-  );
+
+  const { theme, toggleTheme } = useTheme();
+  const darkMode = theme === "dark";
 
   const navigate = useNavigate();
 
   const { logout, user } = useAuth();
-
-  useEffect(() => {
-    const html = document.documentElement;
-    if (darkMode) {
-      html.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      html.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
 
   const handleLogout = () => {
 
@@ -55,11 +45,11 @@ const Header = ({
         top-0
         z-30
         bg-white/90
-        dark:bg-slate-950/90
+        dark:bg-slate-900/90
         backdrop-blur-xl
         border-b
         border-slate-200/50
-        dark:border-slate-800/50
+        dark:border-slate-800
         px-6
         py-4
         shadow-sm
@@ -200,7 +190,8 @@ const Header = ({
           {/* THEME */}
 
           <button
-            onClick={() => setDarkMode((prev) => !prev)}
+            onClick={toggleTheme}
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             className="
               p-2.5
               rounded-xl
@@ -371,7 +362,7 @@ const Header = ({
     border-slate-200
     dark:border-slate-700
     bg-white
-    dark:bg-slate-900
+    dark:bg-slate-800
     shadow-2xl
     z-50
     animate-in
@@ -433,7 +424,7 @@ const Header = ({
         text-slate-700
         dark:text-slate-200
         hover:bg-slate-100
-        dark:hover:bg-slate-800
+        dark:hover:bg-slate-700
         transition-all
       "
     >
@@ -453,7 +444,7 @@ const Header = ({
         text-slate-700
         dark:text-slate-200
         hover:bg-slate-100
-        dark:hover:bg-slate-800
+        dark:hover:bg-slate-700
         transition-all
       "
     >

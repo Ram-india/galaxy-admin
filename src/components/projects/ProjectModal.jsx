@@ -25,7 +25,10 @@ const ProjectModal = ({
       <div
         className="
           bg-white
-          dark:bg-slate-900
+          dark:bg-slate-800
+          border
+          border-slate-200
+          dark:border-slate-700
           rounded-3xl
           shadow-2xl
           w-full
@@ -59,7 +62,7 @@ const ProjectModal = ({
                 projectName: e.target.value,
               })
             }
-            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
 
           <input
@@ -72,7 +75,7 @@ const ProjectModal = ({
                 clientName: e.target.value,
               })
             }
-            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
 
           <input
@@ -85,7 +88,7 @@ const ProjectModal = ({
                 capacity: e.target.value,
               })
             }
-            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
 
           <input
@@ -98,7 +101,7 @@ const ProjectModal = ({
                 location: e.target.value,
               })
             }
-            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
 
           <select
@@ -109,7 +112,7 @@ const ProjectModal = ({
                 projectType: e.target.value,
               })
             }
-            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           >
             <option>Rooftop</option>
             <option>Ground Mounted</option>
@@ -125,7 +128,7 @@ const ProjectModal = ({
                 status: e.target.value,
               })
             }
-            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           >
             <option>Pending</option>
             <option>Ongoing</option>
@@ -141,7 +144,7 @@ const ProjectModal = ({
                 startDate: e.target.value,
               })
             }
-            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
 
           <input
@@ -153,7 +156,7 @@ const ProjectModal = ({
                 completionDate: e.target.value,
               })
             }
-            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
 
           <div className="md:col-span-2">
@@ -166,7 +169,7 @@ const ProjectModal = ({
                   description: e.target.value,
                 })
               }
-              className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               rows={4}
             />
           </div>
@@ -188,7 +191,7 @@ const ProjectModal = ({
                   imagePreviews: previews.length ? previews : formData.imagePreviews,
                 });
               }}
-              className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              className="border border-slate-200 dark:border-slate-700 p-3 rounded-2xl w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
 
             {formData.imagePreviews && formData.imagePreviews.length > 0 && (

@@ -31,7 +31,7 @@ const ProjectTable = ({ projects, onEdit, onDelete, sortConfig, onSort }) => {
   );
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg overflow-hidden border border-slate-200/80 dark:border-slate-800/80">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg overflow-hidden border border-slate-200/80 dark:border-slate-800">
       <div className="overflow-x-auto">
         <table className="w-full text-slate-900 dark:text-slate-100">
           <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-800 text-slate-700 dark:text-slate-200">

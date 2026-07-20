@@ -46,10 +46,10 @@ const Sidebar = ({
 
         min-h-screen
         bg-white
-        dark:bg-slate-950
+        dark:bg-slate-900
         border-r
         border-slate-200/80
-        dark:border-slate-800/80
+        dark:border-slate-800
         transition-all
         duration-500
         flex
