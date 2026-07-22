@@ -1,488 +1,263 @@
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  Bell,
   ChevronDown,
-  Filter,
+  LogOut,
   Menu,
   Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
   Plus,
   Search,
   Settings,
   Sun,
+  UserCog,
 } from "lucide-react";
 
-import { useState } from "react";
-
-import { useNavigate } from "react-router-dom";
-
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/authStore";
 import { useTheme } from "../../context/ThemeContext";
+import { PERMISSIONS } from "../../constants/permissions";
 
-const Header = ({
-  onToggleSidebar,
-}) => {
+import NotificationBell from "../notifications/NotificationBell";
+import UserAvatar from "../team/UserAvatar";
+import GlobalSearch from "./GlobalSearch";
 
-  const [showDropdown, setShowDropdown] = useState(false);
+/**
+ * True on macOS/iOS, where the palette shortcut reads ⌘K rather than Ctrl+K.
+ * `navigator.platform` is deprecated, so prefer userAgentData where available.
+ */
+const isApplePlatform = () => {
+  if (typeof navigator === "undefined") return false;
 
-  const { theme, toggleTheme } = useTheme();
-  const darkMode = theme === "dark";
+  const platform = navigator.userAgentData?.platform || navigator.userAgent;
+  return /mac|iphone|ipad/i.test(platform);
+};
 
+const Header = ({ isCollapsed, onToggleCollapse, onOpenMobileNav }) => {
   const navigate = useNavigate();
+  const { user, logout, hasPermission } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
-  const { logout, user } = useAuth();
+  const isDark = theme === "dark";
+  const canCreateProject = hasPermission(PERMISSIONS.PROJECT_CREATE);
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  // ⌘K / Ctrl+K opens the palette from anywhere
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Dismiss the profile menu on outside click / Escape
+  useEffect(() => {
+    if (!isProfileOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!profileRef.current?.contains(event.target)) setIsProfileOpen(false);
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsProfileOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isProfileOpen]);
 
   const handleLogout = () => {
-
     logout();
-
     navigate("/login");
   };
 
+  const goTo = (path) => {
+    setIsProfileOpen(false);
+    navigate(path);
+  };
+
+  const iconButtonClass =
+    "rounded-xl p-2.5 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800";
+
   return (
-
-    <header
-      className="
-        sticky
-        top-0
-        z-30
-        bg-white/90
-        dark:bg-slate-900/90
-        backdrop-blur-xl
-        border-b
-        border-slate-200/50
-        dark:border-slate-800
-        px-6
-        py-4
-        shadow-sm
-      "
-    >
-
-      <div className="flex items-center justify-between">
-
-        {/* LEFT */}
-
-        <div className="flex items-center gap-4">
-
-          <button
-            onClick={onToggleSidebar}
-            className="
-              p-2
-              rounded-lg
-              text-slate-600
-              dark:text-slate-300
-              hover:bg-slate-100
-              dark:hover:bg-slate-800
-              transition-colors
-            "
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-
-          <div className="hidden md:block">
-
-            
-
-            <p
-              className="
-                text-sm
-                text-slate-500
-                dark:text-slate-400
-              "
+    <>
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 sm:px-6">
+        <div className="flex items-center justify-between gap-3">
+          {/* LEFT */}
+          <div className="flex items-center gap-2">
+            {/* Opens the drawer on mobile */}
+            <button
+              onClick={onOpenMobileNav}
+              aria-label="Open navigation"
+              className={`${iconButtonClass} lg:hidden`}
             >
-              Welcome back {user?.name}
+              <Menu className="h-5 w-5" />
+            </button>
+
+            {/* Collapses the docked rail on desktop */}
+            <button
+              onClick={onToggleCollapse}
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className={`${iconButtonClass} hidden lg:block`}
+            >
+              {isCollapsed ? (
+                <PanelLeftOpen className="h-5 w-5" />
+              ) : (
+                <PanelLeftClose className="h-5 w-5" />
+              )}
+            </button>
+
+            <p className="hidden text-sm text-slate-500 dark:text-slate-400 xl:block">
+              Welcome back, {user?.name?.split(" ")[0] || "Admin"}
             </p>
-
           </div>
 
-        </div>
-
-        {/* SEARCH */}
-
-        <div className="flex-1 max-w-md mx-8 hidden md:block">
-
-          <div className="relative">
-
-            <Search
-              className="
-                w-4
-                h-4
-                absolute
-                left-3
-                top-1/2
-                -translate-y-1/2
-                text-slate-400
-              "
-            />
-
-            <input
-              type="text"
-              placeholder="Search..."
-              className="
-                w-full
-                pl-10
-                pr-10
-                py-2.5
-                rounded-xl
-                bg-slate-100
-                dark:bg-slate-800
-                border
-                border-slate-200
-                dark:border-slate-700
-                text-slate-800
-                dark:text-white
-                placeholder-slate-400
-                focus:outline-none
-                focus:ring-2
-                focus:ring-blue-500
-                transition-all
-              "
-            />
-
-            <button
-              className="
-                absolute
-                right-2
-                top-1/2
-                -translate-y-1/2
-                p-1.5
-                text-slate-400
-                hover:text-slate-600
-              "
-            >
-              <Filter className="w-4 h-4" />
-            </button>
-
-          </div>
-
-        </div>
-
-        {/* RIGHT */}
-
-        <div className="flex items-center gap-3">
-
-          {/* NEW BUTTON */}
-
+          {/* SEARCH — a button, since the real input lives in the palette */}
           <button
-            className="
-              hidden
-              lg:flex
-              items-center
-              gap-2
-              px-4
-              py-2
-              rounded-xl
-              bg-gradient-to-r
-              from-blue-600
-              to-violet-600
-              text-white
-              hover:shadow-xl
-              transition-all
-            "
+            onClick={() => setIsSearchOpen(true)}
+            className="group mx-auto hidden w-full max-w-md items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-400 transition-colors hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 md:flex"
           >
-
-            <Plus className="w-4 h-4" />
-
-            <span className="text-sm font-medium">
-              New
-            </span>
-
+            <Search className="h-4 w-4" />
+            <span className="flex-1 text-left">Search projects, enquiries…</span>
+            <kbd className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:border-slate-600 dark:bg-slate-900">
+              {isApplePlatform() ? "⌘" : "Ctrl"} K
+            </kbd>
           </button>
 
-          {/* THEME */}
+          {/* RIGHT */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Compact search trigger below md */}
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              aria-label="Search"
+              className={`${iconButtonClass} md:hidden`}
+            >
+              <Search className="h-5 w-5" />
+            </button>
 
-          <button
-            onClick={toggleTheme}
-            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-            className="
-              p-2.5
-              rounded-xl
-              text-slate-600
-              dark:text-slate-300
-              hover:bg-slate-100
-              dark:hover:bg-slate-800
-              transition-colors
-            "
-          >
-            {darkMode ? (
-              <Sun className="w-5 h-5" />
-            ) : (
-              <Moon className="w-5 h-5" />
+            {canCreateProject && (
+              <button
+                onClick={() => navigate("/projects?new=1")}
+                className="hidden items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-4 py-2.5 text-sm font-medium text-white transition-shadow hover:shadow-lg lg:flex"
+              >
+                <Plus className="h-4 w-4" />
+                New project
+              </button>
             )}
-          </button>
-
-          {/* NOTIFICATIONS */}
-
-          <button
-            className="
-              relative
-              p-2.5
-              rounded-xl
-              text-slate-600
-              dark:text-slate-300
-              hover:bg-slate-100
-              dark:hover:bg-slate-800
-              transition-colors
-            "
-          >
-
-            <Bell className="w-5 h-5" />
-
-            <span
-              className="
-                absolute
-                -top-1
-                -right-1
-                w-5
-                h-5
-                rounded-full
-                bg-red-500
-                text-white
-                text-xs
-                flex
-                items-center
-                justify-center
-              "
-            >
-              3
-            </span>
-
-          </button>
-
-          {/* SETTINGS */}
-
-          <button
-            className="
-              p-2.5
-              rounded-xl
-              text-slate-600
-              dark:text-slate-300
-              hover:bg-slate-100
-              dark:hover:bg-slate-800
-              transition-colors
-            "
-          >
-            <Settings className="w-5 h-5" />
-          </button>
-
-          {/* PROFILE */}
-
-          <div
-            className="
-              relative
-              flex
-              items-center
-              gap-3
-              pl-3
-              border-l
-              border-slate-200
-              dark:border-slate-700
-            "
-          >
 
             <button
-              onClick={() =>
-                setShowDropdown(
-                  !showDropdown
-                )
-              }
-              className="
-                flex
-                items-center
-                gap-3
-              "
+              onClick={toggleTheme}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              className={iconButtonClass}
             >
-
-              <img
-                src="https://i.pravatar.cc/100"
-                alt="user"
-                className="
-                  w-8
-                  h-8
-                  rounded-full
-                  ring-2
-                  ring-blue-500
-                "
-              />
-
-              <div className="hidden md:block">
-
-                <p
-                  className="
-                    text-sm
-                    font-medium
-                    text-slate-800
-                    dark:text-white
-                  "
-                >
-                  {user?.name || "Admin"}
-                </p>
-
-                <p
-                  className="
-                    text-xs
-                    text-slate-500
-                    dark:text-slate-400
-                  "
-                >
-                  Administrator
-                </p>
-
-              </div>
-
-              <ChevronDown
-                className={`
-                  w-4
-                  h-4
-                  text-slate-400
-                  transition-transform
-                  ${
-                    showDropdown
-                      ? "rotate-180"
-                      : ""
-                  }
-                `}
-              />
-
+              {isDark ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
             </button>
 
-            {/* DROPDOWN */}
+            <NotificationBell />
 
-            {/* DROPDOWN */}
+            {/* PROFILE */}
+            <div
+              className="relative flex items-center border-l border-slate-200 pl-2 dark:border-slate-700 sm:pl-3"
+              ref={profileRef}
+            >
+              <button
+                onClick={() => setIsProfileOpen((open) => !open)}
+                aria-haspopup="menu"
+                aria-expanded={isProfileOpen}
+                className="flex items-center gap-2.5"
+              >
+                <UserAvatar
+                  name={user?.name}
+                  src={user?.avatar}
+                  size="sm"
+                  className="ring-2 ring-blue-500"
+                />
 
-{showDropdown && (
+                <span className="hidden text-left md:block">
+                  <span className="block text-sm font-medium text-slate-800 dark:text-white">
+                    {user?.name || "Admin"}
+                  </span>
+                  <span className="block text-xs text-slate-500 dark:text-slate-400">
+                    {user?.role || "Member"}
+                  </span>
+                </span>
 
-<div
-  className="
-    absolute
-    right-0
-    top-14
-    w-56
-    overflow-hidden
-    rounded-2xl
-    border
-    border-slate-200
-    dark:border-slate-700
-    bg-white
-    dark:bg-slate-800
-    shadow-2xl
-    z-50
-    animate-in
-    fade-in
-    slide-in-from-top-2
-    duration-200
-  "
->
+                <ChevronDown
+                  className={`h-4 w-4 text-slate-400 transition-transform ${
+                    isProfileOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
 
-  {/* USER INFO */}
+              {isProfileOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                >
+                  <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                      {user?.name || "Admin"}
+                    </p>
+                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                      {user?.email}
+                    </p>
+                  </div>
 
-  <div
-    className="
-      px-4
-      py-4
-      border-b
-      border-slate-200
-      dark:border-slate-700
-    "
-  >
+                  <div className="p-1.5">
+                    <button
+                      onClick={() => goTo("/profile")}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      <UserCog className="h-4 w-4 text-slate-400" />
+                      My profile
+                    </button>
 
-    <p
-      className="
-        text-sm
-        font-semibold
-        text-slate-800
-        dark:text-white
-      "
-    >
-      {user?.name || "Admin"}
-    </p>
+                    <button
+                      onClick={() => goTo("/settings")}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      <Settings className="h-4 w-4 text-slate-400" />
+                      Settings
+                    </button>
 
-    <p
-      className="
-        text-xs
-        text-slate-500
-        dark:text-slate-400
-      "
-    >
-      {user?.email || "admin@gmail.com"}
-    </p>
+                    <div className="my-1 h-px bg-slate-100 dark:bg-slate-800" />
 
-  </div>
-
-  {/* MENU ITEMS */}
-
-  <div className="p-2">
-
-    <button
-      className="
-        w-full
-        flex
-        items-center
-        gap-3
-        px-4
-        py-3
-        rounded-xl
-        text-sm
-        text-slate-700
-        dark:text-slate-200
-        hover:bg-slate-100
-        dark:hover:bg-slate-700
-        transition-all
-      "
-    >
-      Profile
-    </button>
-
-    <button
-      className="
-        w-full
-        flex
-        items-center
-        gap-3
-        px-4
-        py-3
-        rounded-xl
-        text-sm
-        text-slate-700
-        dark:text-slate-200
-        hover:bg-slate-100
-        dark:hover:bg-slate-700
-        transition-all
-      "
-    >
-      Settings
-    </button>
-
-    <button
-      onClick={handleLogout}
-      className="
-        w-full
-        flex
-        items-center
-        gap-3
-        px-4
-        py-3
-        rounded-xl
-        text-sm
-        text-red-500
-        hover:bg-red-50
-        dark:hover:bg-red-900/20
-        transition-all
-      "
-    >
-      Logout
-    </button>
-
-  </div>
-
-</div>
-)}
-
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-
         </div>
+      </header>
 
-      </div>
-
-    </header>
+      <GlobalSearch
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
+    </>
   );
 };
 

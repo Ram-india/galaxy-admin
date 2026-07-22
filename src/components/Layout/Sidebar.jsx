@@ -1,325 +1,234 @@
-import {
-  ChevronDown,
-  Zap,
-} from "lucide-react";
-
-import {
-  NavLink,
-  useLocation,
-} from "react-router-dom";
-
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { ChevronDown, Sun, X } from "lucide-react";
 
 import { menuItems } from "../../data/menuItems";
+import { useAuth } from "../../context/authStore";
+import { useNotifications } from "../../context/notificationStore";
+import UserAvatar from "../team/UserAvatar";
 
-const Sidebar = ({
-  collapsed,
-}) => {
+/**
+ * Label shown on hover when the rail is collapsed. Declared at module scope so
+ * it is not recreated (and remounted) on every render.
+ */
+const Tooltip = ({ collapsed, children }) =>
+  collapsed ? (
+    <span className="pointer-events-none absolute left-full z-50 ml-3 hidden whitespace-nowrap rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 lg:block dark:bg-slate-700">
+      {children}
+    </span>
+  ) : null;
 
+/** Small red counter used for live badges. */
+const Badge = ({ value }) =>
+  value > 0 ? (
+    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-semibold text-white">
+      {value > 99 ? "99+" : value}
+    </span>
+  ) : null;
+
+const Sidebar = ({ collapsed, isMobileOpen, onCloseMobile }) => {
   const location = useLocation();
+  const { user, hasPermission } = useAuth();
+  const { unreadCount } = useNotifications();
 
-  const [expandedItems, setExpandedItems] =
-    useState(new Set());
+  /** Live values a menu entry can reference through `badge`. */
+  const badgeValues = { unreadNotifications: unreadCount };
 
-  const toggleExpanded = (itemId) => {
+  // Hide sections this role cannot open at all
+  const visibleItems = useMemo(
+    () =>
+      menuItems.filter(
+        (item) => !item.permission || hasPermission(item.permission)
+      ),
+    [hasPermission]
+  );
 
-    const newExpanded =
-      new Set(expandedItems);
+  const isSectionActive = (item) =>
+    item.submenu
+      ? item.submenu.some((child) => location.pathname.startsWith(child.path))
+      : false;
 
-    if (newExpanded.has(itemId)) {
+  // A section containing the current route starts open, so a reload or a deep
+  // link never lands the user in a collapsed section.
+  const [manuallyToggled, setManuallyToggled] = useState({});
 
-      newExpanded.delete(itemId);
+  const isExpanded = (item) =>
+    manuallyToggled[item.id] ?? isSectionActive(item);
 
-    } else {
+  const toggleSection = (item) =>
+    setManuallyToggled((current) => ({
+      ...current,
+      [item.id]: !isExpanded(item),
+    }));
 
-      newExpanded.add(itemId);
-    }
-
-    setExpandedItems(newExpanded);
-  };
+  const linkClass = ({ isActive }) =>
+    `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+      isActive
+        ? "bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-sm"
+        : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/60"
+    }`;
 
   return (
-
     <aside
-      className={`
-        ${collapsed ? "w-20" : "w-72"}
-
-        min-h-screen
-        bg-white
-        dark:bg-slate-900
-        border-r
-        border-slate-200/80
-        dark:border-slate-800
-        transition-all
-        duration-500
-        flex
-        flex-col
-        shadow-xl
-      `}
+      className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-slate-200 bg-white transition-all duration-300 dark:border-slate-800 dark:bg-slate-900 ${
+        collapsed ? "lg:w-20" : "lg:w-72"
+      } w-72 ${
+        // Off-canvas on mobile until opened; always docked from lg up
+        isMobileOpen ? "translate-x-0" : "-translate-x-full"
+      } lg:translate-x-0`}
     >
-
-      {/* LOGO */}
-
-      <div
-        className="
-          p-6
-          border-b
-          border-slate-200/50
-          dark:border-slate-700/50
-        "
-      >
-
+      {/* BRAND */}
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-800">
         <div className="flex items-center gap-3">
-
-          <div
-            className="
-              w-10
-              h-10
-              rounded-xl
-              bg-gradient-to-r
-              from-blue-600
-              to-purple-600
-              flex
-              items-center
-              justify-center
-            "
-          >
-            <Zap className="w-5 h-5 text-white" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-violet-600">
+            <Sun className="h-5 w-5 text-white" />
           </div>
 
           {!collapsed && (
-
-            <div>
-
-              <h1
-                className="
-                  text-xl
-                  font-bold
-                  text-slate-800
-                  dark:text-white
-                "
-              >
-                My App
-              </h1>
-
-              <p
-                className="
-                  text-xs
-                  text-slate-500
-                "
-              >
-                Admin Panel
+            <div className="lg:block">
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                GPS Solar
               </p>
-
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Admin Console
+              </p>
             </div>
           )}
-
         </div>
 
+        {/* Drawer close — mobile only */}
+        <button
+          onClick={onCloseMobile}
+          aria-label="Close navigation"
+          className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
 
       {/* NAVIGATION */}
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+        {visibleItems.map((item) => {
+          const badgeValue = item.badge ? badgeValues[item.badge] : 0;
 
-      <nav
-        className="
-          flex-1
-          p-4
-          space-y-2
-          overflow-y-auto
-        "
-      >
+          /* ---------------------------------------------- leaf entry */
+          if (!item.submenu) {
+            return (
+              <NavLink
+                key={item.id}
+                to={item.path}
+                onClick={onCloseMobile}
+                className={linkClass}
+              >
+                <item.icon className="h-5 w-5 shrink-0" />
 
-        {menuItems.map((item) => {
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 truncate">{item.label}</span>
+                    <Badge value={badgeValue} />
+                  </>
+                )}
 
-          const isExpanded =
-            expandedItems.has(item.id);
+                {/* Collapsed rail still needs to signal unread items */}
+                {collapsed && badgeValue > 0 && (
+                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+                )}
 
-          const isActive =
-            location.pathname === item.path;
+                <Tooltip collapsed={collapsed}>{item.label}</Tooltip>
+              </NavLink>
+            );
+          }
+
+          /* ------------------------------------------ section + children */
+          const expanded = isExpanded(item);
+          const sectionActive = isSectionActive(item);
 
           return (
-
             <div key={item.id}>
+              <button
+                onClick={() => toggleSection(item)}
+                aria-expanded={expanded}
+                className={`group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                  sectionActive
+                    ? "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white"
+                    : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/60"
+                }`}
+              >
+                <item.icon className="h-5 w-5 shrink-0" />
 
-              {/* MENU ITEM */}
-
-              {item.submenu ? (
-
-                <button
-                  onClick={() =>
-                    toggleExpanded(item.id)
-                  }
-                  className={`
-                    w-full
-                    flex
-                    items-center
-                    justify-between
-                    p-3
-                    rounded-xl
-                    transition-all
-                    duration-300
-
-                    ${
-                      isActive
-                        ? `
-                          bg-gradient-to-r
-                          from-blue-500
-                          to-purple-600
-                          text-white
-                        `
-                        : `
-                          text-slate-600
-                          dark:text-slate-300
-                          hover:bg-slate-100
-                          dark:hover:bg-slate-800/50
-                        `
-                    }
-                  `}
-                >
-
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                    "
-                  >
-
-                    <item.icon
-                      className="w-5 h-5"
-                    />
-
-                    {!collapsed && (
-                      <span>
-                        {item.label}
-                      </span>
-                    )}
-
-                  </div>
-
-                  {!collapsed && (
-
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 truncate text-left">
+                      {item.label}
+                    </span>
                     <ChevronDown
-                      className={`
-                        w-4
-                        h-4
-                        transition-transform
-                        ${
-                          isExpanded
-                            ? "rotate-180"
-                            : ""
-                        }
-                      `}
+                      className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${
+                        expanded ? "rotate-180" : ""
+                      }`}
                     />
-                  )}
+                  </>
+                )}
 
-                </button>
+                <Tooltip collapsed={collapsed}>{item.label}</Tooltip>
+              </button>
 
-              ) : (
-
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `
-                    flex
-                    items-center
-                    justify-between
-                    p-3
-                    rounded-xl
-                    transition-all
-                    duration-300
-
-                    ${
-                      isActive
-                        ? `
-                          bg-gradient-to-r
-                          from-blue-500
-                          to-purple-600
-                          text-white
-                        `
-                        : `
-                          text-slate-600
-                          dark:text-slate-300
-                          hover:bg-slate-100
-                          dark:hover:bg-slate-800/50
-                        `
-                    }
-                  `
-                  }
-                >
-
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                    "
-                  >
-
-                    <item.icon
-                      className="w-5 h-5"
-                    />
-
-                    {!collapsed && (
-                      <span>
-                        {item.label}
-                      </span>
-                    )}
-
-                  </div>
-
-                </NavLink>
+              {/* Children are unreadable in a 20px rail, so only render them
+                  when the sidebar is expanded. */}
+              {expanded && !collapsed && (
+                <div className="mt-1 space-y-0.5 border-l border-slate-200 pl-3 ml-5 dark:border-slate-700">
+                  {item.submenu.map((child) => (
+                    <NavLink
+                      key={child.id}
+                      to={child.path}
+                      onClick={onCloseMobile}
+                      className={({ isActive }) =>
+                        `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
+                          isActive
+                            ? "bg-blue-50 font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-300"
+                            : "text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
+                        }`
+                      }
+                    >
+                      {child.icon && <child.icon className="h-4 w-4 shrink-0" />}
+                      <span className="truncate">{child.label}</span>
+                    </NavLink>
+                  ))}
+                </div>
               )}
-
-              {/* SUBMENU */}
-
-              {
-                item.submenu &&
-                isExpanded &&
-                !collapsed && (
-
-                  <div
-                    className="
-                      ml-8
-                      mt-2
-                      space-y-1
-                    "
-                  >
-
-                    {item.submenu.map(
-                      (subitem) => (
-
-                        <NavLink
-                          key={subitem.id}
-                          to={subitem.path}
-                          className={`
-                            block
-                            p-2
-                            rounded-lg
-                            text-sm
-                            text-slate-600
-                            dark:text-slate-400
-                            hover:bg-slate-100
-                            dark:hover:bg-slate-800/50
-                          `}
-                        >
-
-                          {subitem.label}
-
-                        </NavLink>
-                      )
-                    )}
-
-                  </div>
-                )
-              }
-
             </div>
           );
         })}
-
       </nav>
 
+      {/* CURRENT USER */}
+      <div className="shrink-0 border-t border-slate-200 p-3 dark:border-slate-800">
+        <NavLink
+          to="/profile"
+          onClick={onCloseMobile}
+          className={({ isActive }) =>
+            `group relative flex items-center gap-3 rounded-xl p-2 transition-colors ${
+              isActive
+                ? "bg-slate-100 dark:bg-slate-800"
+                : "hover:bg-slate-100 dark:hover:bg-slate-800/60"
+            }`
+          }
+        >
+          <UserAvatar name={user?.name} src={user?.avatar} size="sm" />
+
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
+                {user?.name || "Admin"}
+              </p>
+              <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                {user?.role || "Member"}
+              </p>
+            </div>
+          )}
+
+          <Tooltip collapsed={collapsed}>{user?.name || "My profile"}</Tooltip>
+        </NavLink>
+      </div>
     </aside>
   );
 };

@@ -5,73 +5,95 @@ import {
   Users,
   Settings,
   Bell,
+  Newspaper,
+  LayoutTemplate,
+  Activity,
+  ShieldCheck,
+  UserCog,
 } from "lucide-react";
 
+import { PERMISSIONS } from "../constants/permissions";
+
+/**
+ * Sidebar navigation.
+ *
+ * `permission` hides an entry from roles that cannot use it — a convenience
+ * only; the route guard and the server both check again. `badge` names a live
+ * counter the Sidebar resolves at render time rather than a hardcoded number.
+ */
 export const menuItems = [
   {
-    id: 1,
+    id: "dashboard",
     label: "Dashboard",
     path: "/dashboard",
     icon: LayoutDashboard,
-    badge: null,
-    active: true,
   },
   {
-    id: 2,
+    id: "projects",
     label: "Projects",
     path: "/projects",
     icon: Briefcase,
-    badge: "12",
-    active: true,
+    permission: PERMISSIONS.PROJECT_VIEW,
   },
   {
-    id: 3,
+    id: "enquiries",
     label: "Enquiries",
     path: "/enquiries",
     icon: FileText,
-    badge: "5",
-    count: 5,
-    active: true,
+    permission: PERMISSIONS.ENQUIRY_VIEW,
   },
   {
-    id: 4,
-    label: "Users",
-    path: "/users",
+    id: "blogs",
+    label: "Blog",
+    path: "/blogs",
+    icon: Newspaper,
+    permission: PERMISSIONS.BLOG_VIEW,
+  },
+  {
+    id: "team",
+    label: "Team",
     icon: Users,
-    count: 3,
-    active: true,
+    permission: PERMISSIONS.TEAM_VIEW,
     submenu: [
       {
-        id: 41,
-        label: "All Users",
+        id: "team-members",
+        label: "Members",
         path: "/users/all-users",
+        icon: UserCog,
       },
       {
-        id: 42,
+        id: "team-roles",
         label: "Roles & Permissions",
         path: "/users/roles",
+        icon: ShieldCheck,
       },
       {
-        id: 43,
-        label: "User Activity",
+        id: "team-activity",
+        label: "Activity",
         path: "/users/activity",
+        icon: Activity,
       },
     ],
   },
   {
-    id: 5,
+    id: "website-content",
+    label: "Website Content",
+    path: "/website-content",
+    icon: LayoutTemplate,
+  },
+  {
+    id: "notifications",
     label: "Notifications",
     path: "/notifications",
     icon: Bell,
-    badge: "New",
-    active: true,
+    badge: "unreadNotifications",
   },
   {
-    id: 6,
+    id: "settings",
     label: "Settings",
     path: "/settings",
     icon: Settings,
-    badge: null,
-    active: true,
   },
 ];
+
+export default menuItems;
