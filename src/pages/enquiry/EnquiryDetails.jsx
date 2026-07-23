@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Clock,
   FileText,
+  Globe,
   Loader2,
   Mail,
   Phone,
@@ -195,6 +196,11 @@ const EnquiryDetails = () => {
                 icon={Zap}
                 label="Installation Type"
                 value={enquiry.installationType}
+              />
+              <Field
+                icon={Globe}
+                label="Source"
+                value={enquiry.source || "Website"}
               />
             </div>
           </Section>

@@ -10,6 +10,7 @@ const DEFAULT_FILTERS = {
   search: "",
   projectType: "all",
   status: "all",
+  source: "all",
   dateRange: "all",
 };
 
@@ -122,6 +123,14 @@ export const useEnquiries = () => {
       }
 
       if (filters.status !== "all" && enquiry.status !== filters.status) {
+        return false;
+      }
+
+      // Absent source is treated as "Website" (the default)
+      if (
+        filters.source !== "all" &&
+        (enquiry.source || "Website") !== filters.source
+      ) {
         return false;
       }
 

@@ -5,6 +5,7 @@ import { ChevronDown, Sun, X } from "lucide-react";
 import { menuItems } from "../../data/menuItems";
 import { useAuth } from "../../context/authStore";
 import { useNotifications } from "../../context/notificationStore";
+import { useBranding } from "../../context/brandingStore";
 import UserAvatar from "../team/UserAvatar";
 
 /**
@@ -30,6 +31,7 @@ const Sidebar = ({ collapsed, isMobileOpen, onCloseMobile }) => {
   const location = useLocation();
   const { user, hasPermission } = useAuth();
   const { unreadCount } = useNotifications();
+  const { logoUrl, siteName } = useBranding();
 
   /** Live values a menu entry can reference through `badge`. */
   const badgeValues = { unreadNotifications: unreadCount };
@@ -77,17 +79,25 @@ const Sidebar = ({ collapsed, isMobileOpen, onCloseMobile }) => {
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       } lg:translate-x-0`}
     >
-      {/* BRAND */}
+      {/* BRAND — the logo uploaded in Website Settings, or a fallback mark */}
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-violet-600">
-            <Sun className="h-5 w-5 text-white" />
-          </div>
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={siteName}
+              className="h-9 w-9 shrink-0 rounded-xl object-contain"
+            />
+          ) : (
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-violet-600">
+              <Sun className="h-5 w-5 text-white" />
+            </div>
+          )}
 
           {!collapsed && (
             <div className="lg:block">
               <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                GPS Solar
+                {siteName}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Admin Console

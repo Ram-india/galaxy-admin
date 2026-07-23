@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Building2,
   Globe,
+  ImageIcon,
   Loader2,
   Mail,
   MapPin,
@@ -11,6 +12,7 @@ import {
   Search,
   Share2,
   Trash2,
+  Upload,
 } from "lucide-react";
 
 import * as settingsApi from "../../services/siteSettingsService";
@@ -96,6 +98,30 @@ const SiteSettings = () => {
     setForm(updated);
     setNotice(message);
     setError("");
+  };
+
+  const logoInputRef = useRef(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = ""; // allow re-picking the same file
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file for the logo.");
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    try {
+      const res = await settingsApi.uploadBrandingImage("logo", file);
+      applyServerState(res.data.settings, "Logo updated.");
+    } catch (err) {
+      setError(toErrorMessage(err, "Could not upload the logo."));
+    } finally {
+      setIsUploadingLogo(false);
+    }
   };
 
   const handleSave = async () => {
@@ -184,6 +210,53 @@ const SiteSettings = () => {
           title="Company identity"
           description="Used in the site header, footer and structured data."
         >
+          {/* LOGO — shown on the website and in this admin panel */}
+          <div className="mb-6 flex flex-col gap-4 border-b border-slate-200 pb-6 dark:border-slate-800 sm:flex-row sm:items-center">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700">
+              {form.identity.logoUrl ? (
+                <img
+                  src={form.identity.logoUrl}
+                  alt="Company logo"
+                  className="h-full w-full object-contain p-1.5"
+                />
+              ) : (
+                <ImageIcon className="h-7 w-7 text-slate-300 dark:text-slate-600" />
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                Company logo
+              </p>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                Appears in the website header and this admin panel. A transparent
+                PNG or SVG works best. Max 2 MB.
+              </p>
+
+              {canManage && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  icon={Upload}
+                  isLoading={isUploadingLogo}
+                  onClick={() => logoInputRef.current?.click()}
+                  className="mt-3"
+                >
+                  {form.identity.logoUrl ? "Replace logo" : "Upload logo"}
+                </Button>
+              )}
+
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+            </div>
+          </div>
+
           <div className="grid gap-5 sm:grid-cols-2">
             <FormField
               label="Site name"

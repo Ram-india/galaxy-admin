@@ -2,6 +2,7 @@ import { Search, X } from "lucide-react";
 import {
   ENQUIRY_STATUSES,
   PROJECT_TYPES,
+  ENQUIRY_SOURCES,
   DATE_FILTERS,
 } from "../../constants/enquiry";
 
@@ -36,7 +37,7 @@ const EnquiryFilters = ({ filters, onChange, onClear, isFiltered }) => (
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:flex lg:items-center">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:items-center">
         <select
           value={filters.projectType}
           onChange={(event) => onChange("projectType", event.target.value)}
@@ -59,6 +60,19 @@ const EnquiryFilters = ({ filters, onChange, onClear, isFiltered }) => (
           {ENQUIRY_STATUSES.map((status) => (
             <option key={status} value={status}>
               {status}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filters.source}
+          onChange={(event) => onChange("source", event.target.value)}
+          className={selectClass}
+        >
+          <option value="all">All Sources</option>
+          {ENQUIRY_SOURCES.map((source) => (
+            <option key={source} value={source}>
+              {source}
             </option>
           ))}
         </select>

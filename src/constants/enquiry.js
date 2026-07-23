@@ -42,6 +42,20 @@ export const STATUS_STYLES = {
     "bg-slate-100 text-slate-600 ring-slate-500/20 dark:bg-slate-500/10 dark:text-slate-300 dark:ring-slate-400/30",
 };
 
+/** Known enquiry sources. Backend `source` is free-text; new values still work. */
+export const ENQUIRY_SOURCES = ["Website", "Solar Calculator"];
+
+/** Tailwind classes per source badge. */
+export const SOURCE_STYLES = {
+  "Solar Calculator":
+    "bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-400/30",
+  Website:
+    "bg-slate-100 text-slate-600 ring-slate-500/20 dark:bg-slate-500/10 dark:text-slate-300 dark:ring-slate-400/30",
+};
+
+export const getSourceStyle = (source) =>
+  SOURCE_STYLES[source] || SOURCE_STYLES.Website;
+
 /** Date range presets offered by the date filter. */
 export const DATE_FILTERS = [
   { value: "all", label: "All time" },

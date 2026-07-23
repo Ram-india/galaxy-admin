@@ -4,6 +4,7 @@ import EmptyState from "./EmptyState";
 import EnquiryActionsMenu from "./EnquiryActionsMenu";
 import { CardsSkeleton } from "./LoadingSkeleton";
 import { formatDate } from "../../utils/format";
+import { getSourceStyle } from "../../constants/enquiry";
 
 /** Label + value pair used inside the card body. */
 const Field = ({ icon: Icon, children }) => (
@@ -76,6 +77,15 @@ const EnquiryCards = ({
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                   {enquiry.projectType || "—"}
                 </p>
+                {enquiry.source && enquiry.source !== "Website" && (
+                  <span
+                    className={`mt-1 inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset ${getSourceStyle(
+                      enquiry.source
+                    )}`}
+                  >
+                    {enquiry.source}
+                  </span>
+                )}
               </div>
 
               <StatusBadge status={enquiry.status} />

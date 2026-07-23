@@ -4,6 +4,7 @@ import EmptyState from "./EmptyState";
 import EnquiryActionsMenu from "./EnquiryActionsMenu";
 import { TableSkeleton } from "./LoadingSkeleton";
 import { formatDate } from "../../utils/format";
+import { getSourceStyle } from "../../constants/enquiry";
 import { getInitials } from "../../utils/initials";
 
 const headerClass =
@@ -96,12 +97,25 @@ const EnquiryTable = ({
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-violet-500 text-xs font-semibold text-white">
                           {getInitials(enquiry.fullName)}
                         </div>
-                        <button
-                          onClick={() => onView(enquiry)}
-                          className="text-left text-sm font-medium text-slate-900 transition-colors hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
-                        >
-                          {enquiry.fullName}
-                        </button>
+                        <div className="min-w-0">
+                          <button
+                            onClick={() => onView(enquiry)}
+                            className="block text-left text-sm font-medium text-slate-900 transition-colors hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                          >
+                            {enquiry.fullName}
+                          </button>
+
+                          {/* Flag non-default sources (e.g. Solar Calculator) */}
+                          {enquiry.source && enquiry.source !== "Website" && (
+                            <span
+                              className={`mt-1 inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset ${getSourceStyle(
+                                enquiry.source
+                              )}`}
+                            >
+                              {enquiry.source}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
 

@@ -40,3 +40,17 @@ export const reorderTestimonials = (ids) =>
 
 export const deleteTestimonial = (id) =>
   API.delete(`/content/testimonials/${id}`);
+
+/* ---------------------------------------------------------------- clients */
+
+export const getClients = () => API.get("/content/clients");
+
+export const createClient = (formData) => API.post("/content/clients", formData);
+
+export const updateClient = (id, formData) =>
+  API.put(`/content/clients/${id}`, formData);
+
+export const reorderClients = (ids) =>
+  API.patch("/content/clients/reorder", { ids });
+
+export const deleteClient = (id) => API.delete(`/content/clients/${id}`);

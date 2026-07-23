@@ -9,6 +9,7 @@ import {
   Loader2,
   MapPin,
   MessageSquareQuote,
+  Building2,
   Star,
   Pencil,
   Plus,
@@ -29,12 +30,14 @@ import EmptyState from "../../components/ui/EmptyState";
 import SlideFormModal from "../../components/content/SlideFormModal";
 import JobFormModal from "../../components/content/JobFormModal";
 import TestimonialFormModal from "../../components/content/TestimonialFormModal";
+import ClientFormModal from "../../components/content/ClientFormModal";
 import UserAvatar from "../../components/team/UserAvatar";
 
 const TABS = [
   { id: "slides", label: "Hero slides", icon: Images },
   { id: "jobs", label: "Careers", icon: Briefcase },
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
+  { id: "clients", label: "Clients", icon: Building2 },
 ];
 
 /**
@@ -51,6 +54,7 @@ const WebsiteContent = () => {
   const [slides, setSlides] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -61,18 +65,22 @@ const WebsiteContent = () => {
   const [isJobFormOpen, setIsJobFormOpen] = useState(false);
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [isQuoteFormOpen, setIsQuoteFormOpen] = useState(false);
+  const [clientTarget, setClientTarget] = useState(null);
+  const [isClientFormOpen, setIsClientFormOpen] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      const [slidesRes, jobsRes, quotesRes] = await Promise.all([
+      const [slidesRes, jobsRes, quotesRes, clientsRes] = await Promise.all([
         contentApi.getSlides(),
         contentApi.getJobs(),
         contentApi.getTestimonials(),
+        contentApi.getClients(),
       ]);
 
       setSlides(slidesRes.data || []);
       setJobs(jobsRes.data.jobs || []);
       setTestimonials(quotesRes.data || []);
+      setClients(clientsRes.data || []);
       setError("");
     } catch (err) {
       setError(toErrorMessage(err, "Unable to load the website content."));
@@ -166,6 +174,40 @@ const WebsiteContent = () => {
     run(() => contentApi.deleteTestimonial(quote._id), "Testimonial deleted.");
   };
 
+  const moveClient = (index, direction) => {
+    const target = index + direction;
+    if (target < 0 || target >= clients.length) return;
+
+    const reordered = [...clients];
+    [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+
+    setClients(reordered);
+    run(
+      () => contentApi.reorderClients(reordered.map((item) => item._id)),
+      "Order saved."
+    );
+  };
+
+  const toggleClient = (client) => {
+    const payload = new FormData();
+    payload.append("isActive", String(!client.isActive));
+
+    run(
+      () => contentApi.updateClient(client._id, payload),
+      client.isActive ? "Client hidden." : "Client shown."
+    );
+  };
+
+  const removeClient = (client) => {
+    if (!window.confirm(`Delete the client "${client.name}"?`)) return;
+    run(() => contentApi.deleteClient(client._id), "Client deleted.");
+  };
+
+  const openClientForm = (client = null) => {
+    setClientTarget(client);
+    setIsClientFormOpen(true);
+  };
+
   const openQuoteForm = (quote = null) => {
     setQuoteTarget(quote);
     setIsQuoteFormOpen(true);
@@ -206,6 +248,7 @@ const WebsiteContent = () => {
               onClick={() => {
                 if (activeTab === "slides") return openSlideForm();
                 if (activeTab === "jobs") return openJobForm();
+                if (activeTab === "clients") return openClientForm();
                 return openQuoteForm();
               }}
             >
@@ -214,7 +257,9 @@ const WebsiteContent = () => {
                   ? "New slide"
                   : activeTab === "jobs"
                     ? "Post job"
-                    : "New testimonial"}
+                    : activeTab === "clients"
+                      ? "Add client"
+                      : "New testimonial"}
               </span>
             </Button>
           )
@@ -549,6 +594,116 @@ const WebsiteContent = () => {
           </div>
         ))}
 
+      {/* CLIENTS */}
+      {activeTab === "clients" &&
+        (clients.length === 0 ? (
+          <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+            <EmptyState
+              icon={Building2}
+              title="No clients yet"
+              description="Add a client logo and it appears in the homepage strip."
+              action={
+                canManage && (
+                  <Button icon={Plus} onClick={() => openClientForm()}>
+                    Add client
+                  </Button>
+                )
+              }
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {clients.map((client, index) => (
+              <div
+                key={client._id}
+                className={`flex items-center gap-4 rounded-xl border bg-white p-4 shadow-sm dark:bg-slate-900 ${
+                  client.isActive
+                    ? "border-slate-200 dark:border-slate-800"
+                    : "border-dashed border-slate-300 opacity-70 dark:border-slate-700"
+                }`}
+              >
+                <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-white p-2 dark:border-slate-800">
+                  {client.logo ? (
+                    <img
+                      src={client.logo}
+                      alt={client.name}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  ) : (
+                    <Building2 className="h-6 w-6 text-slate-300" />
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                      #{index + 1}
+                    </span>
+                    <h3 className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                      {client.name}
+                    </h3>
+                  </div>
+                  {client.website && (
+                    <p className="mt-1 truncate text-xs text-blue-600 dark:text-blue-400">
+                      {client.website}
+                    </p>
+                  )}
+                </div>
+
+                {canManage && (
+                  <div className="flex items-center gap-0.5">
+                    <button
+                      onClick={() => moveClient(index, -1)}
+                      disabled={index === 0}
+                      aria-label="Move up"
+                      className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 disabled:opacity-30 dark:hover:bg-slate-800"
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => moveClient(index, 1)}
+                      disabled={index === clients.length - 1}
+                      aria-label="Move down"
+                      className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 disabled:opacity-30 dark:hover:bg-slate-800"
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => toggleClient(client)}
+                      aria-label={client.isActive ? "Hide client" : "Show client"}
+                      className={`rounded-lg p-2 transition-colors ${
+                        client.isActive
+                          ? "text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                          : "text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      {client.isActive ? (
+                        <Eye className="h-4 w-4" />
+                      ) : (
+                        <EyeOff className="h-4 w-4" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => openClientForm(client)}
+                      aria-label="Edit client"
+                      className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => removeClient(client)}
+                      aria-label="Delete client"
+                      className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+
       <TestimonialFormModal
         isOpen={isQuoteFormOpen}
         testimonial={quoteTarget}
@@ -573,6 +728,16 @@ const WebsiteContent = () => {
         isOpen={isJobFormOpen}
         job={jobTarget}
         onClose={() => setIsJobFormOpen(false)}
+        onSaved={(message) => {
+          setNotice(message);
+          load();
+        }}
+      />
+
+      <ClientFormModal
+        isOpen={isClientFormOpen}
+        client={clientTarget}
+        onClose={() => setIsClientFormOpen(false)}
         onSaved={(message) => {
           setNotice(message);
           load();

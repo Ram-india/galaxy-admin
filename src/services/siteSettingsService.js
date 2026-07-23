@@ -2,6 +2,9 @@ import API from "./api";
 
 export const getSiteSettings = () => API.get("/site-settings");
 
+/** Public branding (logo, name, tagline) — used to brand the admin panel itself. */
+export const getPublicSiteSettings = () => API.get("/site-settings/public");
+
 export const updateSiteSettings = (payload) => API.put("/site-settings", payload);
 
 /** `kind` is "logo" or "og". */
